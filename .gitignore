@@ -22,3 +22,11 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# deployment platforms
+.vercel/
+.netlify/
+.wrangler/
+
+# local agent settings
+.claude/settings.local.json
