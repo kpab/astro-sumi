@@ -1,0 +1,65 @@
+---
+import "../styles/fonts.css";
+import "../styles/global.css";
+
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import { SITE } from "../config";
+
+interface Props {
+  /** Page title, without the site name. Omit on the home page. */
+  title?: string;
+  description?: string;
+  /** Let the hero run under the header. */
+  overlayHeader?: boolean;
+}
+
+const {
+  title,
+  description = SITE.description,
+  overlayHeader = false,
+} = Astro.props;
+
+const pageTitle = title
+  ? `${title} — ${SITE.title}`
+  : `${SITE.title} — ${SITE.tagline}`;
+---
+
+<!doctype html>
+<html lang={SITE.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <link
+      rel="preload"
+      href="/fonts/source-serif-4-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/jetbrains-mono-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+
+    <slot name="head" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header overlay={overlayHeader} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
