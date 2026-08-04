@@ -56,8 +56,11 @@ export const SOCIAL: SocialLink[] = [
 ];
 
 export const BLOG = {
-  /** Posts per page on /blog and the tag archives. */
-  postsPerPage: 8,
+  /**
+   * Posts per page on /blog and the tag archives. Deliberately low so that the
+   * bundled sample posts spill onto a second page; 8–12 suits a real archive.
+   */
+  postsPerPage: 4,
   /** Latest posts shown on the home page. */
   postsOnHome: 4,
   /** Estimated reading speed used for the "N min read" label. */
