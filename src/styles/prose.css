@@ -108,6 +108,8 @@
 .prose pre {
   padding: var(--space-6);
   overflow-x: auto;
+  /* Shiki only exposes its own background as a custom property when
+     defaultColor is false, so the block keeps the page's surface colour. */
   background: var(--color-bg-subtle);
   border: var(--rule-width) solid var(--color-rule);
   border-radius: var(--radius);
@@ -118,6 +120,24 @@
 
 .prose pre code {
   font-size: inherit;
+}
+
+/* `defaultColor: false` leaves both palettes on every token; pick one. */
+.prose pre,
+.prose pre span {
+  color: var(--shiki-light);
+}
+
+:root[data-theme="dark"] .prose pre,
+:root[data-theme="dark"] .prose pre span {
+  color: var(--shiki-dark);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .prose pre,
+  :root:not([data-theme]) .prose pre span {
+    color: var(--shiki-dark);
+  }
 }
 
 /* ---- tables ----------------------------------------------------------- */
