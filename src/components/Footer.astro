@@ -12,19 +12,18 @@ const year = new Date().getFullYear();
       }
     </p>
 
-    {
-      SOCIAL.length > 0 && (
-        <ul class="site-footer__social">
-          {SOCIAL.map((link) => (
-            <li>
-              <a href={link.href} rel="me noopener">
-                {link.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      )
-    }
+    <ul class="site-footer__social">
+      {
+        SOCIAL.map((link) => (
+          <li>
+            <a href={link.href} rel="me noopener">
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
 
     <p class="site-footer__legal">
       © {year} <a href={AUTHOR.url}>{AUTHOR.name}</a> · MIT

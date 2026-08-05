@@ -74,6 +74,12 @@ const structuredData = article
 <link rel="canonical" href={canonical} />
 
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title={`${SITE.title} — ${SITE.tagline}`}
+  href={new URL("rss.xml", Astro.site)}
+/>
 <meta
   name="theme-color"
   content="#faf8f5"
