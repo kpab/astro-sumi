@@ -12,6 +12,9 @@ export const GET: APIRoute = async (context) => {
     description: SITE.description,
     // Guaranteed by `site` in astro.config.ts.
     site: context.site!,
+    // RSS 2.0 reserves <author> for an email address, so the byline goes in
+    // Dublin Core instead. Feed readers understand both.
+    xmlns: { dc: "http://purl.org/dc/elements/1.1/" },
     items: posts.map((post) => ({
       title: post.data.title,
       // Summaries only. Rendering MDX bodies into the feed needs the container
@@ -20,7 +23,7 @@ export const GET: APIRoute = async (context) => {
       pubDate: post.data.pubDate,
       link: `/blog/${post.id}/`,
       categories: post.data.tags,
-      author: AUTHOR.name,
+      customData: `<dc:creator><![CDATA[${AUTHOR.name}]]></dc:creator>`,
     })),
     customData: `<language>${SITE.lang}</language>`,
   });
