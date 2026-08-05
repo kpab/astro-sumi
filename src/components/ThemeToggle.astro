@@ -35,6 +35,36 @@
       button.setAttribute("aria-label", `Switch to ${next} theme`);
     };
 
+    /**
+     * The two `theme-color` metas in BaseHead are keyed on
+     * `prefers-color-scheme`, which only ever tracks the operating system. Once
+     * a theme is pinned they would leave the browser chrome on the other
+     * palette, so replace them with a single unconditional meta.
+     *
+     * The colour is read back off the body rather than hard-coded, so it stays
+     * correct when the palette in tokens.css changes.
+     */
+    const syncThemeColor = () => {
+      if (!root.dataset.theme) return;
+
+      let pinned = document.querySelector('meta[name="theme-color"]:not([media])');
+      if (!pinned) {
+        for (const meta of document.querySelectorAll(
+          'meta[name="theme-color"][media]',
+        )) {
+          meta.remove();
+        }
+        pinned = document.createElement("meta");
+        pinned.setAttribute("name", "theme-color");
+        document.head.appendChild(pinned);
+      }
+
+      pinned.setAttribute(
+        "content",
+        getComputedStyle(document.body).backgroundColor,
+      );
+    };
+
     button.addEventListener("click", () => {
       const next = resolve() === "dark" ? "light" : "dark";
       root.dataset.theme = next;
@@ -44,11 +74,14 @@
         /* private mode — the choice just won't persist */
       }
       syncLabel();
+      syncThemeColor();
     });
 
     // Only relevant while the visitor is still following the OS.
     media.addEventListener("change", syncLabel);
     syncLabel();
+    // Catches a theme restored from localStorage before first paint.
+    syncThemeColor();
   })();
 </script>
 
