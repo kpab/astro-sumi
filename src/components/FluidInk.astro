@@ -46,6 +46,8 @@ const {
   .ink {
     position: relative;
     isolation: isolate;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     background: var(--ink-canvas-bg);
   }
@@ -87,12 +89,14 @@ const {
     display: block;
   }
 
+  /* Grows to fill the band so that anything positioned against its edges lands
+     on the edge of the ink rather than the edge of the text inside it. */
   .ink__content {
     position: relative;
     z-index: 2;
     display: flex;
+    flex: 1;
     flex-direction: column;
-    height: 100%;
     /* Let the cursor reach the simulation; children opt back in. */
     pointer-events: none;
   }
