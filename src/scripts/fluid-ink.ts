@@ -26,8 +26,10 @@ const FRAGMENT = {
   vorticity: `precision highp float;varying vec2 vUv;uniform sampler2D uVel,uCurl;uniform vec2 uTexel;uniform float uDt,uEps;void main(){float L=texture2D(uCurl,vUv-vec2(uTexel.x,0.)).x;float R=texture2D(uCurl,vUv+vec2(uTexel.x,0.)).x;float B=texture2D(uCurl,vUv-vec2(0.,uTexel.y)).x;float T=texture2D(uCurl,vUv+vec2(0.,uTexel.y)).x;float C=texture2D(uCurl,vUv).x;vec2 f=vec2(abs(T)-abs(B),abs(L)-abs(R));f/=length(f)+1e-4;f*=uEps*C;vec2 v=texture2D(uVel,vUv).xy+f*uDt;gl_FragColor=vec4(v,0.,1.);}`,
   pressure: `precision highp float;varying vec2 vUv;uniform sampler2D uPre,uDiv;uniform vec2 uTexel;void main(){float L=texture2D(uPre,vUv-vec2(uTexel.x,0.)).x;float R=texture2D(uPre,vUv+vec2(uTexel.x,0.)).x;float B=texture2D(uPre,vUv-vec2(0.,uTexel.y)).x;float T=texture2D(uPre,vUv+vec2(0.,uTexel.y)).x;float d=texture2D(uDiv,vUv).x;gl_FragColor=vec4((L+R+B+T-d)*.25,0.,0.,1.);}`,
   gradient: `precision highp float;varying vec2 vUv;uniform sampler2D uPre,uVel;uniform vec2 uTexel;void main(){float L=texture2D(uPre,vUv-vec2(uTexel.x,0.)).x;float R=texture2D(uPre,vUv+vec2(uTexel.x,0.)).x;float B=texture2D(uPre,vUv-vec2(0.,uTexel.y)).x;float T=texture2D(uPre,vUv+vec2(0.,uTexel.y)).x;vec2 v=texture2D(uVel,vUv).xy-.5*vec2(R-L,T-B);gl_FragColor=vec4(v,0.,1.);}`,
-  /* uBlend is +1 on a dark page and -1 on a light one. */
-  display: `precision highp float;varying vec2 vUv;uniform sampler2D uDye;uniform vec3 uBg;uniform float uBlend,uVignette;float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}void main(){vec3 d=texture2D(uDye,vUv).rgb;vec2 q=vUv-.5;float vig=1.-uVignette*dot(q,q);vec3 c=uBg*vig+uBlend*d;c+=(h(vUv*vec2(1441.,911.))-.5)/255.;gl_FragColor=vec4(clamp(c,0.,1.),1.);}`,
+  /* uBlend is +1 on a dark page and -1 on a light one. The dither hides 8-bit
+     banding in the gradient; paper needs less of it than a black page, where
+     the same amplitude reads as grain. */
+  display: `precision highp float;varying vec2 vUv;uniform sampler2D uDye;uniform vec3 uBg;uniform float uBlend,uVignette,uDither;float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}void main(){vec3 d=texture2D(uDye,vUv).rgb;vec2 q=vUv-.5;float vig=1.-uVignette*dot(q,q);vec3 c=uBg*vig+uBlend*d;c+=(h(vUv*vec2(1441.,911.))-.5)*uDither;gl_FragColor=vec4(clamp(c,0.,1.),1.);}`,
 } as const;
 
 type ProgramName = keyof typeof FRAGMENT;
@@ -315,7 +317,9 @@ class FluidInk extends HTMLElement {
       velocity.swap();
 
       const accentMix = 0.22;
-      const scale = splat.amount * strength * 0.32;
+      // Ink laid on paper needs more body than ink glowing on black to read as
+      // the same density.
+      const scale = splat.amount * strength * (blend < 0 ? 0.44 : 0.4);
       const target = pigment.map(
         (channel, i) => channel * (1 - accentMix) + accent[i] * accentMix,
       ) as Rgb;
@@ -390,7 +394,8 @@ class FluidInk extends HTMLElement {
       return true;
     };
 
-    const openingSplats = [200, 420, 700, 1050];
+    // Staggered so the hero has ink in it by the time the page settles.
+    const openingSplats = [160, 340, 540, 760, 1000, 1280];
     let nextAmbient = 0;
     let lastFrame = performance.now();
     const started = lastFrame;
@@ -519,6 +524,10 @@ class FluidInk extends HTMLElement {
       gl.uniform1f(programs.display.uniform("uBlend"), blend);
       // Paper takes a much lighter vignette than a black page.
       gl.uniform1f(programs.display.uniform("uVignette"), blend < 0 ? 0.12 : 0.5);
+      gl.uniform1f(
+        programs.display.uniform("uDither"),
+        blend < 0 ? 0.5 / 255 : 1 / 255,
+      );
       blit(null);
     };
 
