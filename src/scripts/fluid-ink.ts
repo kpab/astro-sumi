@@ -54,6 +54,7 @@ interface DoubleFbo {
 }
 
 interface Program {
+  handle: WebGLProgram;
   use(): void;
   uniform(name: string): WebGLUniformLocation | null;
 }
@@ -83,6 +84,8 @@ const random = (min: number, max: number) => min + Math.random() * (max - min);
 
 class FluidInk extends HTMLElement {
   private frameHandle = 0;
+  private startHandle = 0;
+  private idle = false;
   private observers: { disconnect(): void }[] = [];
   private cleanups: (() => void)[] = [];
   private booted = false;
@@ -93,6 +96,25 @@ class FluidInk extends HTMLElement {
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (reducedMotion.matches) return;
+
+    // Creating the context and compiling nine shader programs is a few hundred
+    // milliseconds of main-thread work on a slow device. On the critical path
+    // that dominates LCP, so wait for the page to settle first — the static
+    // gradient underneath is already painted.
+    // Safari only shipped requestIdleCallback recently; fall back to a timer.
+    const idle: typeof window.requestIdleCallback | undefined =
+      window.requestIdleCallback;
+
+    if (idle) {
+      this.idle = true;
+      this.startHandle = idle(() => this.boot(), { timeout: 1500 });
+    } else {
+      this.startHandle = window.setTimeout(() => this.boot(), 250);
+    }
+  }
+
+  private boot(): void {
+    if (!this.isConnected) return;
 
     const canvas = document.createElement("canvas");
     canvas.style.cssText = "width:100%;height:100%;display:block";
@@ -176,6 +198,7 @@ class FluidInk extends HTMLElement {
       const cache = new Map<string, WebGLUniformLocation | null>();
 
       return {
+        handle: program,
         use() {
           gl.useProgram(program);
           gl.bindBuffer(gl.ARRAY_BUFFER, quad);
@@ -195,6 +218,18 @@ class FluidInk extends HTMLElement {
     for (const name of Object.keys(FRAGMENT) as ProgramName[]) {
       programs[name] = link(FRAGMENT[name]);
     }
+
+    // Where supported, the driver compiles in the background and we poll
+    // instead of blocking the main thread on first use. Nine programs is
+    // otherwise a few hundred milliseconds in one unbroken task.
+    const parallel = gl.getExtension("KHR_parallel_shader_compile");
+    const compiling = Object.values(programs);
+    let compiled = !parallel;
+
+    const programsReady = () =>
+      compiling.every((program) =>
+        gl.getProgramParameter(program.handle, parallel!.COMPLETION_STATUS_KHR),
+      );
 
     const createFbo = (width: number, height: number): Fbo => {
       const texture = gl.createTexture()!;
@@ -398,10 +433,22 @@ class FluidInk extends HTMLElement {
     const openingSplats = [160, 340, 540, 760, 1000, 1280];
     let nextAmbient = 0;
     let lastFrame = performance.now();
-    const started = lastFrame;
+    let started = lastFrame;
 
     const frame = (now: number) => {
       this.frameHandle = requestAnimationFrame(frame);
+
+      if (!compiled) {
+        if (!programsReady()) {
+          lastFrame = now;
+          return;
+        }
+        compiled = true;
+        // Restart the clock so the opening splats still arrive spread out
+        // rather than all at once the moment compilation finishes.
+        started = now;
+      }
+
       if (!resize() || !visible) {
         lastFrame = now;
         return;
@@ -536,6 +583,11 @@ class FluidInk extends HTMLElement {
 
   disconnectedCallback(): void {
     cancelAnimationFrame(this.frameHandle);
+    if (this.startHandle) {
+      if (this.idle) cancelIdleCallback(this.startHandle);
+      else clearTimeout(this.startHandle);
+      this.startHandle = 0;
+    }
     for (const observer of this.observers) observer.disconnect();
     for (const cleanup of this.cleanups) cleanup();
     this.observers = [];
