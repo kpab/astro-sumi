@@ -47,12 +47,15 @@
   --color-selection-bg: var(--color-accent);
   --color-selection-fg: var(--color-accent-fg);
 
-  /* Ink simulation reads these three through getComputedStyle. */
+  /*
+   * The ink simulation resolves these three by reading them off a probe
+   * element, which is what makes light-dark() collapse to a real colour.
+   * Whether it paints ink onto paper or glows it on black is derived from the
+   * luminance of --ink-canvas-bg, so a custom palette keeps working.
+   */
   --ink-canvas-bg: light-dark(var(--washi-200), var(--sumi-950));
   --ink-pigment: light-dark(#1a1a1a, #e8e6e0);
   --ink-accent: light-dark(var(--shu-500), var(--shu-400));
-  /* 'subtract' paints dark ink onto paper, 'add' glows ink on black. */
-  --ink-blend: light-dark(subtract, add);
 
   /* ---- typography ---------------------------------------------------- */
   --font-serif: "Source Serif 4", "Source Serif Pro", "Yu Mincho", YuMincho,
