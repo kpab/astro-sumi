@@ -2,6 +2,7 @@
 import "../styles/fonts.css";
 import "../styles/global.css";
 
+import BaseHead, { type ArticleMeta } from "../components/BaseHead.astro";
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
 import { SITE } from "../config";
@@ -10,6 +11,10 @@ interface Props {
   /** Page title, without the site name. Omit on the home page. */
   title?: string;
   description?: string;
+  /** Absolute path or URL of the social preview image. */
+  ogImage?: string;
+  /** Present on article pages; drives OG type and structured data. */
+  article?: ArticleMeta;
   /** Let the hero run under the header. */
   overlayHeader?: boolean;
 }
@@ -17,6 +22,8 @@ interface Props {
 const {
   title,
   description = SITE.description,
+  ogImage,
+  article,
   overlayHeader = false,
 } = Astro.props;
 
@@ -28,51 +35,12 @@ const pageTitle = title
 <!doctype html>
 <html lang={SITE.lang}>
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    {/* Pin the stored theme before first paint. Without a stored choice the
-        document keeps `color-scheme: light dark` and follows the OS. */}
-    <script is:inline>
-      try {
-        const stored = localStorage.getItem("sumi-theme");
-        if (stored === "light" || stored === "dark") {
-          document.documentElement.dataset.theme = stored;
-        }
-      } catch {}
-    </script>
-
-    <meta
-      name="theme-color"
-      content="#faf8f5"
-      media="(prefers-color-scheme: light)"
+    <BaseHead
+      title={pageTitle}
+      description={description}
+      ogImage={ogImage}
+      article={article}
     />
-    <meta
-      name="theme-color"
-      content="#0b0c0e"
-      media="(prefers-color-scheme: dark)"
-    />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-
-    <link
-      rel="preload"
-      href="/fonts/source-serif-4-latin.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/jetbrains-mono-latin.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-
-    <title>{pageTitle}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
-
     <slot name="head" />
   </head>
 

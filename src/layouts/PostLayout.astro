@@ -7,7 +7,7 @@ import "../styles/prose.css";
 import PostNav from "../components/PostNav.astro";
 import TableOfContents from "../components/TableOfContents.astro";
 import BaseLayout from "./BaseLayout.astro";
-import { BLOG } from "../config";
+import { BLOG, OG } from "../config";
 import { formatDate, isoDate } from "../utils/date";
 import { readingTime } from "../utils/reading-time";
 import { tagSlug, type Post } from "../utils/posts";
@@ -31,9 +31,20 @@ const {
 } = post.data;
 
 const minutes = readingTime(post.body);
+
+const article = {
+  publishedTime: isoDate(pubDate),
+  modifiedTime: updatedDate ? isoDate(updatedDate) : undefined,
+  tags,
+};
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout
+  title={title}
+  description={description}
+  ogImage={OG.enabled ? `/og/${post.id}.png` : undefined}
+  article={article}
+>
   <article class="post wrap">
     <header class="post__header">
       <p class="post__stamp eyebrow">
