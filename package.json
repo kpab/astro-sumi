@@ -2,7 +2,33 @@
   "name": "astro-sumi",
   "type": "module",
   "version": "0.1.0",
+  "description": "A minimal Astro 7 blog theme in ink and washi paper, with dual light and dark palettes, zero client JavaScript on article pages, and a WebGL ink simulation on the front page.",
   "license": "MIT",
+  "author": "kpab (https://github.com/kpab)",
+  "homepage": "https://github.com/kpab/astro-sumi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kpab/astro-sumi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kpab/astro-sumi/issues"
+  },
+  "keywords": [
+    "astro",
+    "astro-theme",
+    "astro-template",
+    "astro-blog",
+    "astro-component",
+    "withastro",
+    "blog",
+    "theme",
+    "minimal",
+    "dark-mode",
+    "mdx",
+    "typography",
+    "webgl",
+    "japanese"
+  ],
   "engines": {
     "node": ">=22.12.0"
   },
