@@ -80,6 +80,20 @@ export const OG = { enabled: true, width: 1200, height: 630 };
 
 Setting both `INK` flags to `false` leaves the theme with no external JavaScript at all — the hero keeps a static ink gradient.
 
+### What the ink costs
+
+Measured with Lighthouse under its default mobile profile (4× CPU throttling, slow 4G) against `npm run preview`, which serves uncompressed:
+
+| Page                     | Performance | Accessibility | Best practices | SEO |
+| ------------------------ | ----------: | ------------: | -------------: | --: |
+| Article                  |       85–96 |           100 |            100 | 100 |
+| Home, `INK.hero: true`   |       74–81 |           100 |            100 | 100 |
+| Home, `INK.hero: false`  |          93 |           100 |            100 | 100 |
+
+LCP on the home page is 1.9 s and CLS is 0 either way — the simulation is deferred until the browser is idle, so it never blocks first paint. What it does cost is blocking time while the shaders compile, which is why the front page scores lower than an article. A real host with compression, and a device that is not being throttled fourfold, both do better than these numbers.
+
+If you want the front page in the high nineties, turn `INK.hero` off. The article range depends on how much highlighted code a post contains.
+
 ## Writing posts
 
 Posts are Markdown or MDX files in `src/content/blog/`. The filename becomes the URL.
