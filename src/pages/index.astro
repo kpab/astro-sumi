@@ -121,11 +121,14 @@ const posts = (await getPublishedPosts()).slice(0, BLOG.postsOnHome);
     translate: 0 -50%;
   }
 
+  /* These describe the simulation, so they only appear once it has actually
+     started — not when it declined for reduced motion or missing WebGL2. The
+     element tags itself with data-ink-active on boot. */
   .hero__notes {
+    display: none;
     position: absolute;
     inset-inline: var(--gutter);
     bottom: var(--space-6);
-    display: flex;
     justify-content: space-between;
     gap: var(--space-4);
     font-family: var(--font-mono);
@@ -133,6 +136,10 @@ const posts = (await getPublishedPosts()).slice(0, BLOG.postsOnHome);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--color-fg-faint);
+  }
+
+  :global(.ink:has([data-ink-active])) .hero__notes {
+    display: flex;
   }
 
   .latest__head {
@@ -169,7 +176,7 @@ const posts = (await getPublishedPosts()).slice(0, BLOG.postsOnHome);
   }
 
   @media (max-width: 34rem) {
-    .hero__notes {
+    :global(.ink:has([data-ink-active])) .hero__notes {
       display: none;
     }
   }
