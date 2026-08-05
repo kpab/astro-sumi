@@ -76,14 +76,19 @@ h5,
 h6 {
   font-weight: 500;
   line-height: var(--leading-tight);
+  /* Cheap here: headings are short and there are few of them per page. */
   text-wrap: balance;
   letter-spacing: var(--tracking-tight);
 }
 
-p,
-li {
-  text-wrap: pretty;
-}
+/*
+ * `text-wrap: pretty` on body copy is deliberately not set. It reads well, but
+ * Chrome re-runs layout over the tail of every paragraph, and on an article of
+ * this length that measured as ~570 ms of extra blocking time — more than the
+ * whole rest of the page. Add it back if you want it and can spare that:
+ *
+ *   p, li { text-wrap: pretty; }
+ */
 
 a {
   color: inherit;
