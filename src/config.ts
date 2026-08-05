@@ -52,7 +52,6 @@ export const NAV: NavItem[] = [
 
 export const SOCIAL: SocialLink[] = [
   { label: "GitHub", href: "https://github.com/kpab/astro-sumi" },
-  { label: "Site", href: "https://github.com/kpab" },
 ];
 
 export const BLOG = {
