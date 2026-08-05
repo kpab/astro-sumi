@@ -36,7 +36,9 @@
 
   --color-fg: light-dark(var(--sumi-800), var(--sumi-100));
   --color-fg-muted: light-dark(var(--sumi-400), rgba(233, 231, 225, 0.62));
-  --color-fg-faint: light-dark(rgba(26, 26, 26, 0.45), rgba(233, 231, 225, 0.38));
+  /* Faint still has to clear 4.5:1 against the page — it is used for tag links,
+     the contents heading and the footer, not just decoration. */
+  --color-fg-faint: light-dark(rgba(26, 26, 26, 0.62), rgba(233, 231, 225, 0.55));
 
   --color-rule: light-dark(rgba(26, 26, 26, 0.14), rgba(233, 231, 225, 0.14));
   --color-rule-strong: light-dark(rgba(26, 26, 26, 0.28), rgba(233, 231, 225, 0.28));
