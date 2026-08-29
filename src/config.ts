@@ -19,7 +19,7 @@ export interface SocialLink {
 
 export const SITE = {
   /** Absolute origin of the deployed site. No trailing slash. */
-  url: "https://astro-sumi.pages.dev",
+  url: "https://sumi.p4ni.com",
   title: "Sumi",
   /**
    * Short Japanese mark used for the vertical rail and the loading screen.
